@@ -7,7 +7,6 @@ export default class Board extends Component {
     render() {
         return (
             <div>
-                <h2>{this.props.status}</h2>
                 <div style={{display: "flex"}}>
                     <Square value={this.props.squareList[0]} onClick={()=>this.props.onClick(0)}/>
                     <Square value={this.props.squareList[1]} onClick={()=>this.props.onClick(1)}/>

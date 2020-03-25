@@ -10,6 +10,7 @@ class App extends Component {
       history: [{
         squares: ['','','','','','','','','']
       }],
+      stepNumber: 0,
       xIsNext: false, //false is X, true is O
     }
   }
@@ -34,7 +35,7 @@ class App extends Component {
   }
 
   onSquareClicked = (i) => {
-    const history = this.state.history;
+    const history = this.state.history.slice(0, this.state.stepNumber+1);
     console.log('history:', history);
     const current = history[history.length - 1];
     console.log('current:', current);
@@ -48,15 +49,33 @@ class App extends Component {
       history: history.concat([{
         squares: squareList,
       }]),
+      stepNumber: history.length,
       xIsNext: !this.state.xIsNext
     });
     console.log('xIsNext:',this.state.xIsNext)
 }
 
+  jumpTo(step){
+    this.setState({
+      stepNumber: step,
+      xIsNext: (step%2)===0
+    })
+  }
+
   render(){
     const history = this.state.history;
-    const current = history[history.length-1];
+    const current = history[this.state.stepNumber];
     const winner = this.calculateWinner(current.squares);
+
+    const moves = history.map((step, move) => {
+      const desc = move ?
+      `Go to move # ${move}` : `Go to game start`;
+      return (
+      <li key={move}>
+        <button onClick={()=>this.jumpTo(move)}>{desc}</button>
+      </li>
+      )
+    })
 
     let status = '';  
 
@@ -67,12 +86,18 @@ class App extends Component {
         status = this.state.xIsNext?`NextPlayer is O`:`NextPlayer is X`
     }
 
-
     return (
       <div>
         <h1>Tic Tac Toe</h1>
-        {/* <Board squares={this.state.squares} nextPlayer={this.state.nextPlayer} setParentsState={this.setParentsState}/> */}
+        <h2>{status}</h2>
+        <div className="game-area d-flex justify-content-between">
         <Board {...this.state} status={status} squareList={current.squares} onClick={(i)=>this.onSquareClicked(i)} calculateWinner={this.calculateWinner}/>
+        <div className="game-info">
+            <ol>{moves}</ol>
+        </div>
+        </div>
+        {/* <Board squares={this.state.squares} nextPlayer={this.state.nextPlayer} setParentsState={this.setParentsState}/> */}
+       
       </div>
     );
   }
