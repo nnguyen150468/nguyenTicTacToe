@@ -4,7 +4,9 @@ import './App.css';
 import Board from './components/Board';
 import FacebookLogin from 'react-facebook-login';
 
-const APP_ID = process.env.REACT_APP_APP_ID;
+// const APP_ID = process.env.REACT_APP_APP_ID;
+const APP_ID=`747409708999962`
+
 let startTime = 0;
 let endTime = 0;
 let TIME_ELAPSED_IN_SECONDS;
