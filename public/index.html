@@ -39,5 +39,28 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
+
+<script>
+  const APP_ID = process.env.REACT_APP_APP_ID;
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : APP_ID,
+      cookie     : true,
+      xfbml      : true,
+      version    : `http://ftw-highscores.herokuapp.com/tictactoe-dev`
+    });
+      
+    FB.AppEvents.logPageView();   
+      
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "https://connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+</script>
   </body>
 </html>
