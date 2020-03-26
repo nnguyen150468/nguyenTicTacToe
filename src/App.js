@@ -4,12 +4,14 @@ import './App.css';
 import Board from './components/Board';
 import FacebookLogin from 'react-facebook-login';
 
-// const APP_ID = process.env.REACT_APP_APP_ID;
-const APP_ID=`747409708999962`
+const APP_ID = process.env.REACT_APP_APP_ID;
+
 
 let startTime = 0;
 let endTime = 0;
-let TIME_ELAPSED_IN_SECONDS;
+let timeScore=null;
+let gameOver = false;
+
 class App extends Component {
   constructor(props){
     super(props)
@@ -17,13 +19,13 @@ class App extends Component {
       history: [{
         squares: ['','','','','','','','','']
       }],
-      leaderBoard: [],
+      topRank: [],
       stepNumber: 0,
       user: '',
       xIsNext: false, //false is X, true is O
     }
   }
-
+ // ooP object oriented paradigm
   
 
   calculateWinner = (squares) => {
@@ -47,17 +49,20 @@ class App extends Component {
 
   onSquareClicked = (i) => {
     const history = this.state.history.slice(0, this.state.stepNumber+1);
-    console.log('history:', history);
-    if(this.state.stepNumber===0){
+    // console.log('history:', history);
+
+    if(startTime===0){
       startTime=Date.now();
       console.log('startTime',startTime);
     }
+
     const current = history[history.length - 1];
     console.log('current:', current);
     const squareList = current.squares.slice();
     if(this.calculateWinner(squareList) || squareList[i]){
       return;
   }
+
     squareList[i]=this.state.xIsNext?"O":"X";
     console.log(`squareList[${i}]`, squareList[i])
     this.setState({
@@ -97,6 +102,7 @@ class App extends Component {
       body: data.toString(),
       json: true
     });
+    gameOver = true;
     this.getData();
   }
 
@@ -105,37 +111,39 @@ class App extends Component {
     let response = await fetch(url);
     let data = await response.json();
     console.log("data from API",data);
-    // this.setState({loaderBoard: data.items})
+    this.setState({topRank: data.items});
   }
 
+   moves = () =>  this.state.history.map((step, move) => {
+    const desc = move ?
+    `Go to move # ${move}` : `Go to game start`;
+    return (
+    <li key={move}>
+      <button onClick={()=>this.jumpTo(move)}>{desc}</button>
+    </li>
+    )
+  })
+
   render(){
+    let status = '';  
     const history = this.state.history;
     const current = history[this.state.stepNumber];
-    const winner = this.calculateWinner(current.squares);
-
-    const moves = history.map((step, move) => {
-      const desc = move ?
-      `Go to move # ${move}` : `Go to game start`;
-      return (
-      <li key={move}>
-        <button onClick={()=>this.jumpTo(move)}>{desc}</button>
-      </li>
-      )
-    })
-
-    let status = '';  
-
-    let timeScore;
- 
-    if(winner){
+  
+    if(gameOver){
+      status = `game over`;
+    } else {
+      const winner = this.calculateWinner(current.squares);
+      if(winner){
         timeScore = Math.floor((Date.now()-startTime)/1000);
-        this.postData(timeScore);
         status = `Winner is ${winner}!`;
         console.log('Winner is:', winner);
+        this.postData(timeScore);
     } else {
         status = this.state.xIsNext?`NextPlayer is O`:`NextPlayer is X`
     }
-
+  }
+ 
+   
     if(!this.state.user){
       return (
         <FacebookLogin
@@ -145,28 +153,31 @@ class App extends Component {
         callback={this.responseFacebook} />
       )
     }
+
     return (
       <div>     
         <h1>Tic Tac Toe</h1>
         <h2>User info: {this.state.user}</h2>
         <h2>{status}</h2>
+
         <div className="game-area d-flex justify-content-between">
         <Board {...this.state} status={status} squareList={current.squares} 
-        postData={this.postData()}
+        postData={this.postData}
         onClick={(i)=>this.onSquareClicked(i)} calculateWinner={this.calculateWinner}/>
         <div className="game-info">
-            <ol>{moves}</ol>
+            <ol>{this.moves()}</ol>
             <div>Score: {timeScore}</div>
-            {/* <div>{this.state.leaderBoard.player}</div>
-            <div>{this.state.leaderBoard.score}</div> */}
+            <ol>Top Scores
+              {this.state.topRank.map((item) => {
+                return (<li>{item.player} : {item.score}</li>)
+              })} 
+            </ol>
         </div>
         </div>
-        {/* <Board squares={this.state.squares} nextPlayer={this.state.nextPlayer} setParentsState={this.setParentsState}/> */}
-       
       </div>
     );
   }
+  }
 
-}
 
 export default App;
